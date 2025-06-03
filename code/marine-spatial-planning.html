@@ -341,8 +341,8 @@ Loading required package: lattice</code></pre>
 </div>
 <p>76% of the species are protected using the Shannon-Weiner method. Therefore, Shannon-Weiner is worse than alpha diversity.</p>
 </section>
-<section id="biogeographic-zonation" class="level2">
-<h2 class="anchored" data-anchor-id="biogeographic-zonation">Biogeographic Zonation</h2>
+<section id="biogeographic-zonation-method" class="level2">
+<h2 class="anchored" data-anchor-id="biogeographic-zonation-method">Biogeographic Zonation Method</h2>
 <p>Calculating the number of species for each biogeographic zone (E, W and S).</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb29"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb29-1"><a href="#cb29-1" aria-hidden="true" tabindex="-1"></a><span class="fu">specnumber</span>(EF[,<span class="dv">4</span><span class="sc">:</span><span class="dv">148</span>], EF<span class="sc">$</span>BZ)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -497,6 +497,61 @@ Loading required package: lattice</code></pre>
 <span id="cb45-15"><a href="#cb45-15" aria-hidden="true" tabindex="-1"></a>  }</span>
 <span id="cb45-16"><a href="#cb45-16" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
+<p>These groupings are great, but notice that some of the groups in the <code>slice80_list</code> only have 1 estuary in them, which leaves us with only 17 estuaries total, but we want a total of 20 estuaries, so we need to select 3 from the larger groups.</p>
+<p>Looking at the <code>EF</code> data frame, groups <code>2</code>, <code>3</code> and <code>6</code> in the <code>slice80_list</code> column have the most number of estuaries, so let’s select an additional estuary from each one.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb46"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb46-1"><a href="#cb46-1" aria-hidden="true" tabindex="-1"></a>target_slices <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">2</span>, <span class="dv">3</span>, <span class="dv">6</span>)</span>
+<span id="cb46-2"><a href="#cb46-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb46-3"><a href="#cb46-3" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (g <span class="cf">in</span> target_slices) {</span>
+<span id="cb46-4"><a href="#cb46-4" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-5"><a href="#cb46-5" aria-hidden="true" tabindex="-1"></a>  group <span class="ot">&lt;-</span> <span class="fu">which</span>(EF<span class="sc">$</span>slice80 <span class="sc">==</span> g)</span>
+<span id="cb46-6"><a href="#cb46-6" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb46-7"><a href="#cb46-7" aria-hidden="true" tabindex="-1"></a><span class="co"># if group falls within our targetted slices, we assign the top 3 a value of 1  </span></span>
+<span id="cb46-8"><a href="#cb46-8" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (<span class="fu">length</span>(group) <span class="sc">&gt;=</span> <span class="dv">3</span>) {</span>
+<span id="cb46-9"><a href="#cb46-9" aria-hidden="true" tabindex="-1"></a>    EF<span class="sc">$</span>slice80_list[group[<span class="dv">1</span><span class="sc">:</span><span class="dv">3</span>]] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb46-10"><a href="#cb46-10" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (<span class="fu">length</span>(group) <span class="sc">&gt;</span> <span class="dv">0</span>) {</span>
+<span id="cb46-11"><a href="#cb46-11" aria-hidden="true" tabindex="-1"></a>    EF<span class="sc">$</span>slice80_list[group] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb46-12"><a href="#cb46-12" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb46-13"><a href="#cb46-13" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Great it worked, let’s plot these estuaries on our alpha plot.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb47"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb47-1"><a href="#cb47-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(EF, <span class="fu">aes</span>(<span class="at">x =</span> kmEast, <span class="at">y =</span> alpha, <span class="at">color =</span> <span class="fu">factor</span>(slice80_list))) <span class="sc">+</span></span>
+<span id="cb47-2"><a href="#cb47-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb47-3"><a href="#cb47-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"black"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"red"</span>),</span>
+<span id="cb47-4"><a href="#cb47-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Other"</span>, <span class="st">"Top 20"</span>),</span>
+<span id="cb47-5"><a href="#cb47-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">name =</span> <span class="st">"Alpha Rank"</span>) <span class="sc">+</span></span>
+<span id="cb47-6"><a href="#cb47-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatterplot of Alpha Diversity vs. km East"</span>,</span>
+<span id="cb47-7"><a href="#cb47-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Distance from Western Boundary (km East)"</span>,</span>
+<span id="cb47-8"><a href="#cb47-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Alpha Diversity"</span>) <span class="sc">+</span></span>
+<span id="cb47-9"><a href="#cb47-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="marine-spatial-planning_files/figure-html/unnamed-chunk-32-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Notice how the points are more spread.</p>
+<p>Now I need to list the species in the groups.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb48"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb48-1"><a href="#cb48-1" aria-hidden="true" tabindex="-1"></a>slice80_spp <span class="ot">&lt;-</span> <span class="fu">specnumber</span>(EF[,<span class="dv">4</span><span class="sc">:</span><span class="dv">148</span>], EF<span class="sc">$</span>slice80_list)</span>
+<span id="cb48-2"><a href="#cb48-2" aria-hidden="true" tabindex="-1"></a>slice80_spp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  0   1 
+132  97 </code></pre>
+</div>
+</div>
+<p>And once again, I calculate the percentage.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb50"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb50-1"><a href="#cb50-1" aria-hidden="true" tabindex="-1"></a>slice80_percentage <span class="ot">&lt;-</span> (<span class="dv">97</span><span class="sc">/</span><span class="dv">145</span>) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb50-2"><a href="#cb50-2" aria-hidden="true" tabindex="-1"></a>slice80_percentage</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 66.89655</code></pre>
+</div>
+</div>
+<p>However, this is way less species than our previous methods.</p>
 </section>
 
 </main>
