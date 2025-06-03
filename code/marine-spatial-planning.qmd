@@ -1,0 +1,346 @@
+---
+title: "Marine-Spatial-Planning-Deliverable"
+author: "Muhammad Uzair Davids"
+format: html
+editor: visual
+---
+
+## Analysis Environment
+
+```{r packages}
+library(tidyverse) # for data wrangling
+library(ggplot2) # creating plot
+library(vegan) # ecological analyses
+```
+
+## Reading the Data
+
+Loading the `EstuaryFishSurveyData.csv` data set.
+
+```{r load data}
+EF <- read.csv("C:/Users/Dell/OneDrive/Desktop/UCT/Marine Spatial Planning/Marine-Spatial-Planning/data/EstuaryFishSurveyData.csv") # read data into a dataframe.
+
+```
+
+Replace the `NA` values with `0`.
+
+```{r}
+EF[is.na(EF)] <- 0 
+```
+
+## Plot Number of Species
+
+Create a separate column, called `alpha`, which counts the number of species per estuary.
+
+```{r}
+EF$alpha <- specnumber(EF[ 4: 148])
+```
+
+Now create a plot.
+
+```{r}
+# Keep the original order of Estuaries
+EF$Estuary <- factor(EF$Estuary, levels = unique(EF$Estuary))
+
+# Plot barplot
+ggplot(EF, aes(x = Estuary, y = alpha)) +
+  geom_bar(stat = "identity", fill = "grey") +
+  labs(title = "Alpha Diversity by Estuary",
+       x = "Estuary",
+       y = "Alpha Diversity") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 90, hjust = 1, size = 5))
+```
+
+Calculate Shannon-Weiner Diversity Index. This index takes into account the number of species and the evenness. We can do this using the `diversity` function in the package `vegan`.
+
+```{r}
+EF$SW <- diversity(EF[ 4: 148], index = "shannon")
+```
+
+Plotting diversity.
+
+`alpha` - Y axis
+
+`kmEast` - X axis
+
+Creating a `kmEast` column. Subtract 3000 from `kmWest`.
+
+```{r}
+EF$kmEast <- 3000 - EF$kmWest
+```
+
+Create a plot for alpha against kmEast.
+
+```{r}
+ggplot(EF, aes(x = kmEast, y = alpha)) +
+  geom_point(color = "black", size = 2, alpha = 0.7) +
+  labs(title = "Scatterplot of Alpha Diversity vs. kmEast",
+       x = "Distance from Western Boundary (kmEast)",
+       y = "Alpha Diversity") +
+  theme_minimal()
+```
+
+Create a plot for Shannon-Weiner against kmEast.
+
+```{r}
+ggplot(EF, aes(x = kmEast, y = SW)) +
+  geom_point(color = "black", size = 2, alpha = 0.7) +
+  labs(title = "Scatterplot of Shannon-Weiner Diversity vs. kmEast",
+       x = "Distance from Western Boundary (kmEast)",
+       y = "Shannon-Weiner Diversity") +
+  theme_minimal()
+```
+
+## Alpha Method
+
+Now rank from highest to lowest diversity.
+
+alpha_rank
+
+Top 20 - 1
+
+The rest get a 0.
+
+```{r}
+# order the data frame.
+EF <- EF[order(-EF$alpha),]
+
+# rank the top 20.
+EF$alpha_list <- 0 
+EF$alpha_list[1:20] <- 1
+```
+
+Now plot the top 20 in red on the graph.
+
+```{r}
+ggplot(EF, aes(x = kmEast, y = alpha, color = factor(alpha_list))) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_color_manual(values = c("0" = "black", "1" = "red"),
+                     labels = c("Other", "Top 20"),
+                     name = "Alpha Rank") +
+  labs(title = "Scatterplot of Alpha Diversity vs. km East",
+       x = "Distance from Western Boundary (km East)",
+       y = "Alpha Diversity") +
+  theme_minimal()
+```
+
+The most diverse estuaries are in the East.
+
+Species in the East might not be the same in the West - if we protect all these estuaries in the East, species in estuaries in the West would not be protected.
+
+Economic issues - economic opportunities and struggles restricted to the East.
+
+Climate change - shifting patterns in diversity.
+
+NEED TO SPREAD PROTECTION.
+
+Now we need to save the top 20. This takes the top 20 estuaries and creates a new data frame containing the list of the top 20 estuaries.
+
+```{r}
+alpha_list <- EF[1:20, 1]
+alpha_list
+```
+
+What is the number of species that these top 20 estuaries would protect?
+
+```{r}
+alpha_spp <- specnumber(EF[,4:148], EF$alpha_list)
+alpha_spp
+```
+
+There are 116 species of the 144 species represented in the top 20 most diverse estuaries. But how effective is this system? What percentage of species does this list account for?
+
+```{r}
+alpha_percentage <- (116/145) * 100
+alpha_percentage
+```
+
+80 species from the total list falls within the top 20. But we need a representative list of all species within all ecosystems.
+
+## Shannon-Weiner Method
+
+Let's do everything again for the Shannon-Weiner values.
+
+```{r}
+# order the data frame.
+EF <- EF[order(-EF$SW),]
+
+# rank the top 20.
+EF$SW_list <- 0 
+EF$SW_list[1:20] <- 1
+```
+
+Now plot the top 20 for Shannon-Weiner.
+
+```{r}
+ggplot(EF, aes(x = kmEast, y = alpha, color = factor(SW_list))) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_color_manual(values = c("0" = "black", "1" = "red"),
+                     labels = c("Other", "Top 20"),
+                     name = "Shannon-Weiner Rank") +
+  labs(title = "Scatterplot of Alpha Diversity vs. km East",
+       x = "Distance from Western Boundary (km East)",
+       y = "Alpha Diversity") +
+  theme_minimal()
+```
+
+The issue stands that all the points are still in the East.
+
+Save the top 20 into a new data frame.
+
+```{r}
+SW_list <- EF[1:20, 1]
+SW_list
+```
+
+Now see which species are contained in this list.
+
+```{r}
+SW_spp <- specnumber(EF[,4:148], EF$SW_list)
+SW_spp
+```
+
+Calculate the percentage.
+
+```{r}
+SW_percentage <- (110/145) * 100
+SW_percentage
+```
+
+76% of the species are protected using the Shannon-Weiner method. Therefore, Shannon-Weiner is worse than alpha diversity.
+
+## Biogeographic Zonation
+
+Calculating the number of species for each biogeographic zone (E, W and S).
+
+```{r}
+specnumber(EF[,4:148], EF$BZ)
+```
+
+Look at the most diverse estuaries in the three zones. Take 6 from W, 7 from E and S.
+
+Order twice, by zones and then by alpha.
+
+First to order by biogeographic zone. The code below orders the estuaries into biogeographic zones and orders the alpha within each biogeographic zone.
+
+```{r}
+EF <- EF[order(EF$BZ, -EF$alpha),]
+```
+
+Creating a list.
+
+```{r}
+EF$BZ_list <- 0
+
+# top alphas per zone 
+top_n <- c(W = 6, S = 7, E = 7 )
+
+# create a loop which labels the top as 1
+for (z in names(top_n)) {
+  zone_rows <- which(EF$BZ == z)
+  EF$BZ_list[head(zone_rows, top_n[z])] <-  1
+}
+```
+
+Plot the list.
+
+```{r}
+ggplot(EF, aes(x = kmEast, y = alpha, color = factor(BZ_list))) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_color_manual(values = c("0" = "black", "1" = "red"),
+                     labels = c("Other", "Top estuaries"),
+                     name = "Alpha Rank") +
+  labs(title = "Scatterplot of Alpha Diversity vs. km East",
+       x = "Distance from Western Boundary (km East)",
+       y = "Alpha Diversity") +
+  theme_minimal()
+```
+
+Alot of these estuaries are still closer to the eastern side of the country.
+
+The species list.
+
+```{r}
+BZ_spp <- specnumber(EF[,4:148], EF$BZ_list)
+BZ_spp
+```
+
+Percentage.
+
+```{r}
+BZ_percentage <- (122/145) * 100
+BZ_percentage
+```
+
+## Dendrogram
+
+Creating a matrix of pairwise comparisons between each estuary to develop an index of similarity in species composition. Using species composition to inform us on "ecosystem types", and using that to compile a list of all ecosystem types which need to be represented.
+
+Create a standardised matrix.
+
+```{r}
+EF <- subset(EF, alpha>0)
+EF_deco <- decostand(EF[,4:148], method = "total")
+```
+
+Calculate Brays-Curtis similarity matrix.
+
+```{r}
+EF_dist <- vegdist(EF_deco, method = "bray")
+```
+
+Now to create the actual dendrogram plot.
+
+```{r}
+EF_clust <- hclust(EF_dist, "average")
+plot(EF_clust, labels = EF$Estuary, 
+     hang = -1, 
+     cex = 0.6,
+     main = NULL,
+     sub = "",
+     ylab = "Dissimilarity")
+```
+
+Reduce the tree.
+
+```{r}
+slice <- cutree(EF_clust, 
+                h = 0.8) # cuts tree at 0.75 dissimilarity
+slice
+```
+
+## Slice-80 Method
+
+Add slice to data frame.
+
+```{r}
+EF$slice80 <- slice
+```
+
+Order by slice and alpha.
+
+```{r}
+EF <- EF[order(EF$slice80, -EF$alpha),]
+```
+
+Create the list which selects the two most diverse estuaries from the slice80 groups.
+
+```{r}
+EF$slice80_list <- 0
+
+for (g in unique(EF$slice80)) {
+  
+  group <- which(EF$slice80 == g)
+  
+# if group has 2 or more rows, score top 2  
+  if (length(group) >= 2) {
+    top_2 <- group[1:2]
+    EF$slice80_list[top_2] <- 1
+
+# if group has only 1 row, assign it a 1    
+  } else if (length(group) == 1) {
+    EF$slice80_list[group] <- 1
+  }
+}
+```
