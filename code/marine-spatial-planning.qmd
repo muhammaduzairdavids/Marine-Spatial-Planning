@@ -396,7 +396,7 @@ slice80_percentage <- (97/145) * 100
 slice80_percentage
 ```
 
-However, this is way less species than our previous methods.
+However, this is way less species than our previous methods. Class got \~74%.
 
 ## Range Centre Method
 
@@ -408,8 +408,8 @@ First we need to extract the species abundance data and `kmWest` values from `EF
 # species abundance data
 spp <- EF[, 4:148]
 
-# distance from western boundary
-coords <- EF$kmWest          
+# distance from eastern boundary
+coords <- EF$kmEast          
 ```
 
 Now we need to calculate the range for each species. We can create a function to do this.
@@ -422,8 +422,8 @@ range_stats <- function(abundance, coords) {
     # species not present anywhere
     return(c(west_limit = NA, east_limit = NA, center = NA))
   } else {
-    west <- min(present_coords)                    # furthest west point
-    east <- max(present_coords)                    # furthest east point
+    east <- min(present_coords)                    # furthest east point
+    west <- max(present_coords)                    # furthest west point
     centre <- mean(c(west, east))                  # center of range
     
     return(c(west_limit = west, east_limit = east, centre = centre))
@@ -452,8 +452,112 @@ Now we can plot a histogram with the frequency of range centres per 100 km.
 ```{r}
 ggplot(spp_range_list, aes(x = centre)) +
   geom_histogram(binwidth = 100, fill = "grey", color = "black") +
-  xlab("Range Centre (km West)") +
+  xlab("Range Centre (km East)") +
   ylab("Number of Species") +
   ggtitle("Frequency of Species Range Centres (per 100 km)") +
   theme_minimal()
+```
+
+Now we need to find a way to extract the frequencies from the histogram and add that data to the `EF` data frame.
+
+We can start by scoring them.
+
+```{r}
+EF$block <- ceiling(EF$kmEast/100)
+
+
+EF$RC_list <- 1
+
+# order by kmEast
+EF <- EF[order(EF$kmEast),]
+```
+
+Let's check the top 20 estuaries.
+
+```{r}
+interval_table <- table(cut(spp_range_list$centre,seq(0,3000,100)))
+print(order(interval_table, decreasing = TRUE))
+```
+
+Here we can see that the lowest frequencies are 2, 3, 4, 5, 6, 8, 9, 11, 13 and 14
+
+Let's remove the estuaries we don't want.
+
+```{r}
+# define blocks to score as 0
+zero_blocks <- c(13, 14, 3, 9, 11, 2, 4, 5, 6, 8)
+
+# score the defined blocks as 0
+for (i in 1:nrow(EF)) {
+  if (EF$block[i] %in% zero_blocks) {
+    EF$RC_list[i] <- 0 
+  }
+}
+```
+
+Now subset the data and remove the estuaries with `RC_list` = 0.
+
+```{r}
+EF <- subset(EF, RC_list > 0)
+```
+
+Order by block and alpha.
+
+```{r}
+# order by block and alpha
+EF <- EF[order(EF$block, -EF$alpha),]
+```
+
+Score the top 20 alpha values.
+
+```{r}
+max <- EF$alpha[1]  # Initialize max with the first alpha value
+EF$RC_list <- 0  # Assuming the first is always a "1"
+EF$RC_list[1] <- 1
+
+for (j in 2:nrow(EF)) {
+  if (EF$block[j] > EF$block[j-1]) {
+    max <- 0
+    if (EF$alpha[j] > max) {
+     EF$RC_list[j] <- 1 
+    max <- EF$alpha[j]
+    }
+  } else if (EF$block[j] == EF$block[j-1]) {
+    if (EF$alpha[j] > max) {
+      EF$RC_list[j] <- 1
+      EF$RC_list[j-1] <- 0
+      max <- EF$alpha[j]
+    }
+  }
+}
+
+sum(EF$RC_list)
+```
+
+Plot the estuaries.
+
+```{r}
+ggplot(EF, aes(x = kmEast, y = alpha, color = factor(RC_list))) +
+  geom_point(size = 2, alpha = 0.7) +
+  scale_color_manual(values = c("0" = "black", "1" = "red"),
+                     labels = c("Other", "Top 20"),
+                     name = "Alpha Rank") +
+  labs(title = "Scatterplot of Alpha Diversity vs. km East",
+       x = "Distance from Western Boundary (km East)",
+       y = "Alpha Diversity") +
+  theme_minimal()
+```
+
+Number of species.
+
+```{r}
+RC_spp <- specnumber(EF[,4:148], EF$RC_list)
+RC_spp
+```
+
+Percentage
+
+```{r}
+RC_percentage <- (121/145) * 100
+RC_percentage
 ```
