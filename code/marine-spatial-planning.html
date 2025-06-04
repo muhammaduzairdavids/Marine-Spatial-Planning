@@ -551,7 +551,7 @@ Loading required package: lattice</code></pre>
 <pre><code>[1] 66.89655</code></pre>
 </div>
 </div>
-<p>However, this is way less species than our previous methods.</p>
+<p>However, this is way less species than our previous methods. Class got ~74%.</p>
 </section>
 <section id="range-centre-method" class="level2">
 <h2 class="anchored" data-anchor-id="range-centre-method">Range Centre Method</h2>
@@ -561,8 +561,8 @@ Loading required package: lattice</code></pre>
 <div class="sourceCode cell-code" id="cb52"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb52-1"><a href="#cb52-1" aria-hidden="true" tabindex="-1"></a><span class="co"># species abundance data</span></span>
 <span id="cb52-2"><a href="#cb52-2" aria-hidden="true" tabindex="-1"></a>spp <span class="ot">&lt;-</span> EF[, <span class="dv">4</span><span class="sc">:</span><span class="dv">148</span>]</span>
 <span id="cb52-3"><a href="#cb52-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co"># distance from western boundary</span></span>
-<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> EF<span class="sc">$</span>kmWest          </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<span id="cb52-4"><a href="#cb52-4" aria-hidden="true" tabindex="-1"></a><span class="co"># distance from eastern boundary</span></span>
+<span id="cb52-5"><a href="#cb52-5" aria-hidden="true" tabindex="-1"></a>coords <span class="ot">&lt;-</span> EF<span class="sc">$</span>kmEast          </span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 </div>
 <p>Now we need to calculate the range for each species. We can create a function to do this.</p>
 <div class="cell">
@@ -573,8 +573,8 @@ Loading required package: lattice</code></pre>
 <span id="cb53-5"><a href="#cb53-5" aria-hidden="true" tabindex="-1"></a>    <span class="co"># species not present anywhere</span></span>
 <span id="cb53-6"><a href="#cb53-6" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">west_limit =</span> <span class="cn">NA</span>, <span class="at">east_limit =</span> <span class="cn">NA</span>, <span class="at">center =</span> <span class="cn">NA</span>))</span>
 <span id="cb53-7"><a href="#cb53-7" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> {</span>
-<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    west <span class="ot">&lt;-</span> <span class="fu">min</span>(present_coords)                    <span class="co"># furthest west point</span></span>
-<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>    east <span class="ot">&lt;-</span> <span class="fu">max</span>(present_coords)                    <span class="co"># furthest east point</span></span>
+<span id="cb53-8"><a href="#cb53-8" aria-hidden="true" tabindex="-1"></a>    east <span class="ot">&lt;-</span> <span class="fu">min</span>(present_coords)                    <span class="co"># furthest east point</span></span>
+<span id="cb53-9"><a href="#cb53-9" aria-hidden="true" tabindex="-1"></a>    west <span class="ot">&lt;-</span> <span class="fu">max</span>(present_coords)                    <span class="co"># furthest west point</span></span>
 <span id="cb53-10"><a href="#cb53-10" aria-hidden="true" tabindex="-1"></a>    centre <span class="ot">&lt;-</span> <span class="fu">mean</span>(<span class="fu">c</span>(west, east))                  <span class="co"># center of range</span></span>
 <span id="cb53-11"><a href="#cb53-11" aria-hidden="true" tabindex="-1"></a>    </span>
 <span id="cb53-12"><a href="#cb53-12" aria-hidden="true" tabindex="-1"></a>    <span class="fu">return</span>(<span class="fu">c</span>(<span class="at">west_limit =</span> west, <span class="at">east_limit =</span> east, <span class="at">centre =</span> centre))</span>
@@ -596,19 +596,19 @@ Loading required package: lattice</code></pre>
 <span id="cb54-8"><a href="#cb54-8" aria-hidden="true" tabindex="-1"></a><span class="fu">head</span>(spp_range_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
 <div class="cell-output cell-output-stdout">
 <pre><code>                          Species west_limit east_limit centre
-Spot.damsel           Spot.damsel          3          3    3.0
-Estuarine.bream   Estuarine.bream        179       1034  606.5
-Bald.glassy           Bald.glassy        179       1139  659.0
-Slender.glassy     Slender.glassy          3        745  374.0
-Longspine.glassy Longspine.glassy          3        881  442.0
-Evileye.blaasop   Evileye.blaasop        267       2031 1149.0</code></pre>
+Spot.damsel           Spot.damsel       2997       2997 2997.0
+Estuarine.bream   Estuarine.bream       2821       1966 2393.5
+Bald.glassy           Bald.glassy       2821       1861 2341.0
+Slender.glassy     Slender.glassy       2997       2255 2626.0
+Longspine.glassy Longspine.glassy       2997       2119 2558.0
+Evileye.blaasop   Evileye.blaasop       2733        969 1851.0</code></pre>
 </div>
 </div>
 <p>Now we can plot a histogram with the frequency of range centres per 100 km.</p>
 <div class="cell">
 <div class="sourceCode cell-code" id="cb56"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb56-1"><a href="#cb56-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(spp_range_list, <span class="fu">aes</span>(<span class="at">x =</span> centre)) <span class="sc">+</span></span>
 <span id="cb56-2"><a href="#cb56-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_histogram</span>(<span class="at">binwidth =</span> <span class="dv">100</span>, <span class="at">fill =</span> <span class="st">"grey"</span>, <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
-<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Range Centre (km West)"</span>) <span class="sc">+</span></span>
+<span id="cb56-3"><a href="#cb56-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Range Centre (km East)"</span>) <span class="sc">+</span></span>
 <span id="cb56-4"><a href="#cb56-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Number of Species"</span>) <span class="sc">+</span></span>
 <span id="cb56-5"><a href="#cb56-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Frequency of Species Range Centres (per 100 km)"</span>) <span class="sc">+</span></span>
 <span id="cb56-6"><a href="#cb56-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
@@ -618,6 +618,111 @@ Evileye.blaasop   Evileye.blaasop        267       2031 1149.0</code></pre>
 <p><img src="marine-spatial-planning_files/figure-html/unnamed-chunk-38-1.png" class="img-fluid figure-img" width="672"></p>
 </figure>
 </div>
+</div>
+</div>
+<p>Now we need to find a way to extract the frequencies from the histogram and add that data to the <code>EF</code> data frame.</p>
+<p>We can start by scoring them.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb57"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb57-1"><a href="#cb57-1" aria-hidden="true" tabindex="-1"></a>EF<span class="sc">$</span>block <span class="ot">&lt;-</span> <span class="fu">ceiling</span>(EF<span class="sc">$</span>kmEast<span class="sc">/</span><span class="dv">100</span>)</span>
+<span id="cb57-2"><a href="#cb57-2" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-3"><a href="#cb57-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-4"><a href="#cb57-4" aria-hidden="true" tabindex="-1"></a>EF<span class="sc">$</span>RC_list <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb57-5"><a href="#cb57-5" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb57-6"><a href="#cb57-6" aria-hidden="true" tabindex="-1"></a><span class="co"># order by kmEast</span></span>
+<span id="cb57-7"><a href="#cb57-7" aria-hidden="true" tabindex="-1"></a>EF <span class="ot">&lt;-</span> EF[<span class="fu">order</span>(EF<span class="sc">$</span>kmEast),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Let’s check the top 20 estuaries.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb58"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb58-1"><a href="#cb58-1" aria-hidden="true" tabindex="-1"></a>interval_table <span class="ot">&lt;-</span> <span class="fu">table</span>(<span class="fu">cut</span>(spp_range_list<span class="sc">$</span>centre,<span class="fu">seq</span>(<span class="dv">0</span>,<span class="dv">3000</span>,<span class="dv">100</span>)))</span>
+<span id="cb58-2"><a href="#cb58-2" aria-hidden="true" tabindex="-1"></a><span class="fu">print</span>(<span class="fu">order</span>(interval_table, <span class="at">decreasing =</span> <span class="cn">TRUE</span>))</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code> [1] 26 25 27 20 21 16 24 22 29 18 15 17 19 23 28 30  1  7 10 12 13 14  3  9 11
+[26]  2  4  5  6  8</code></pre>
+</div>
+</div>
+<p>Here we can see that the lowest frequencies are 2, 3, 4, 5, 6, 8, 9, 11, 13 and 14</p>
+<p>Let’s remove the estuaries we don’t want.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb60"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb60-1"><a href="#cb60-1" aria-hidden="true" tabindex="-1"></a><span class="co"># define blocks to score as 0</span></span>
+<span id="cb60-2"><a href="#cb60-2" aria-hidden="true" tabindex="-1"></a>zero_blocks <span class="ot">&lt;-</span> <span class="fu">c</span>(<span class="dv">13</span>, <span class="dv">14</span>, <span class="dv">3</span>, <span class="dv">9</span>, <span class="dv">11</span>, <span class="dv">2</span>, <span class="dv">4</span>, <span class="dv">5</span>, <span class="dv">6</span>, <span class="dv">8</span>)</span>
+<span id="cb60-3"><a href="#cb60-3" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb60-4"><a href="#cb60-4" aria-hidden="true" tabindex="-1"></a><span class="co"># score the defined blocks as 0</span></span>
+<span id="cb60-5"><a href="#cb60-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (i <span class="cf">in</span> <span class="dv">1</span><span class="sc">:</span><span class="fu">nrow</span>(EF)) {</span>
+<span id="cb60-6"><a href="#cb60-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (EF<span class="sc">$</span>block[i] <span class="sc">%in%</span> zero_blocks) {</span>
+<span id="cb60-7"><a href="#cb60-7" aria-hidden="true" tabindex="-1"></a>    EF<span class="sc">$</span>RC_list[i] <span class="ot">&lt;-</span> <span class="dv">0</span> </span>
+<span id="cb60-8"><a href="#cb60-8" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb60-9"><a href="#cb60-9" aria-hidden="true" tabindex="-1"></a>}</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Now subset the data and remove the estuaries with <code>RC_list</code> = 0.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb61"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb61-1"><a href="#cb61-1" aria-hidden="true" tabindex="-1"></a>EF <span class="ot">&lt;-</span> <span class="fu">subset</span>(EF, RC_list <span class="sc">&gt;</span> <span class="dv">0</span>)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Order by block and alpha.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb62"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb62-1"><a href="#cb62-1" aria-hidden="true" tabindex="-1"></a><span class="co"># order by block and alpha</span></span>
+<span id="cb62-2"><a href="#cb62-2" aria-hidden="true" tabindex="-1"></a>EF <span class="ot">&lt;-</span> EF[<span class="fu">order</span>(EF<span class="sc">$</span>block, <span class="sc">-</span>EF<span class="sc">$</span>alpha),]</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+</div>
+<p>Score the top 20 alpha values.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb63"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb63-1"><a href="#cb63-1" aria-hidden="true" tabindex="-1"></a>max <span class="ot">&lt;-</span> EF<span class="sc">$</span>alpha[<span class="dv">1</span>]  <span class="co"># Initialize max with the first alpha value</span></span>
+<span id="cb63-2"><a href="#cb63-2" aria-hidden="true" tabindex="-1"></a>EF<span class="sc">$</span>RC_list <span class="ot">&lt;-</span> <span class="dv">0</span>  <span class="co"># Assuming the first is always a "1"</span></span>
+<span id="cb63-3"><a href="#cb63-3" aria-hidden="true" tabindex="-1"></a>EF<span class="sc">$</span>RC_list[<span class="dv">1</span>] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb63-4"><a href="#cb63-4" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-5"><a href="#cb63-5" aria-hidden="true" tabindex="-1"></a><span class="cf">for</span> (j <span class="cf">in</span> <span class="dv">2</span><span class="sc">:</span><span class="fu">nrow</span>(EF)) {</span>
+<span id="cb63-6"><a href="#cb63-6" aria-hidden="true" tabindex="-1"></a>  <span class="cf">if</span> (EF<span class="sc">$</span>block[j] <span class="sc">&gt;</span> EF<span class="sc">$</span>block[j<span class="dv">-1</span>]) {</span>
+<span id="cb63-7"><a href="#cb63-7" aria-hidden="true" tabindex="-1"></a>    max <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb63-8"><a href="#cb63-8" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (EF<span class="sc">$</span>alpha[j] <span class="sc">&gt;</span> max) {</span>
+<span id="cb63-9"><a href="#cb63-9" aria-hidden="true" tabindex="-1"></a>     EF<span class="sc">$</span>RC_list[j] <span class="ot">&lt;-</span> <span class="dv">1</span> </span>
+<span id="cb63-10"><a href="#cb63-10" aria-hidden="true" tabindex="-1"></a>    max <span class="ot">&lt;-</span> EF<span class="sc">$</span>alpha[j]</span>
+<span id="cb63-11"><a href="#cb63-11" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb63-12"><a href="#cb63-12" aria-hidden="true" tabindex="-1"></a>  } <span class="cf">else</span> <span class="cf">if</span> (EF<span class="sc">$</span>block[j] <span class="sc">==</span> EF<span class="sc">$</span>block[j<span class="dv">-1</span>]) {</span>
+<span id="cb63-13"><a href="#cb63-13" aria-hidden="true" tabindex="-1"></a>    <span class="cf">if</span> (EF<span class="sc">$</span>alpha[j] <span class="sc">&gt;</span> max) {</span>
+<span id="cb63-14"><a href="#cb63-14" aria-hidden="true" tabindex="-1"></a>      EF<span class="sc">$</span>RC_list[j] <span class="ot">&lt;-</span> <span class="dv">1</span></span>
+<span id="cb63-15"><a href="#cb63-15" aria-hidden="true" tabindex="-1"></a>      EF<span class="sc">$</span>RC_list[j<span class="dv">-1</span>] <span class="ot">&lt;-</span> <span class="dv">0</span></span>
+<span id="cb63-16"><a href="#cb63-16" aria-hidden="true" tabindex="-1"></a>      max <span class="ot">&lt;-</span> EF<span class="sc">$</span>alpha[j]</span>
+<span id="cb63-17"><a href="#cb63-17" aria-hidden="true" tabindex="-1"></a>    }</span>
+<span id="cb63-18"><a href="#cb63-18" aria-hidden="true" tabindex="-1"></a>  }</span>
+<span id="cb63-19"><a href="#cb63-19" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb63-20"><a href="#cb63-20" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb63-21"><a href="#cb63-21" aria-hidden="true" tabindex="-1"></a><span class="fu">sum</span>(EF<span class="sc">$</span>RC_list)</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 20</code></pre>
+</div>
+</div>
+<p>Plot the estuaries.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb65"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb65-1"><a href="#cb65-1" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(EF, <span class="fu">aes</span>(<span class="at">x =</span> kmEast, <span class="at">y =</span> alpha, <span class="at">color =</span> <span class="fu">factor</span>(RC_list))) <span class="sc">+</span></span>
+<span id="cb65-2"><a href="#cb65-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.7</span>) <span class="sc">+</span></span>
+<span id="cb65-3"><a href="#cb65-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"0"</span> <span class="ot">=</span> <span class="st">"black"</span>, <span class="st">"1"</span> <span class="ot">=</span> <span class="st">"red"</span>),</span>
+<span id="cb65-4"><a href="#cb65-4" aria-hidden="true" tabindex="-1"></a>                     <span class="at">labels =</span> <span class="fu">c</span>(<span class="st">"Other"</span>, <span class="st">"Top 20"</span>),</span>
+<span id="cb65-5"><a href="#cb65-5" aria-hidden="true" tabindex="-1"></a>                     <span class="at">name =</span> <span class="st">"Alpha Rank"</span>) <span class="sc">+</span></span>
+<span id="cb65-6"><a href="#cb65-6" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Scatterplot of Alpha Diversity vs. km East"</span>,</span>
+<span id="cb65-7"><a href="#cb65-7" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="st">"Distance from Western Boundary (km East)"</span>,</span>
+<span id="cb65-8"><a href="#cb65-8" aria-hidden="true" tabindex="-1"></a>       <span class="at">y =</span> <span class="st">"Alpha Diversity"</span>) <span class="sc">+</span></span>
+<span id="cb65-9"><a href="#cb65-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output-display">
+<div>
+<figure class="figure">
+<p><img src="marine-spatial-planning_files/figure-html/unnamed-chunk-45-1.png" class="img-fluid figure-img" width="672"></p>
+</figure>
+</div>
+</div>
+</div>
+<p>Number of species.</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb66"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb66-1"><a href="#cb66-1" aria-hidden="true" tabindex="-1"></a>RC_spp <span class="ot">&lt;-</span> <span class="fu">specnumber</span>(EF[,<span class="dv">4</span><span class="sc">:</span><span class="dv">148</span>], EF<span class="sc">$</span>RC_list)</span>
+<span id="cb66-2"><a href="#cb66-2" aria-hidden="true" tabindex="-1"></a>RC_spp</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>  0   1 
+117 121 </code></pre>
+</div>
+</div>
+<p>Percentage</p>
+<div class="cell">
+<div class="sourceCode cell-code" id="cb68"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb68-1"><a href="#cb68-1" aria-hidden="true" tabindex="-1"></a>RC_percentage <span class="ot">&lt;-</span> (<span class="dv">121</span><span class="sc">/</span><span class="dv">145</span>) <span class="sc">*</span> <span class="dv">100</span></span>
+<span id="cb68-2"><a href="#cb68-2" aria-hidden="true" tabindex="-1"></a>RC_percentage</span></code><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></pre></div>
+<div class="cell-output cell-output-stdout">
+<pre><code>[1] 83.44828</code></pre>
 </div>
 </div>
 </section>
