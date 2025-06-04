@@ -44,7 +44,7 @@ EF$Estuary <- factor(EF$Estuary, levels = unique(EF$Estuary))
 
 # Plot barplot
 ggplot(EF, aes(x = Estuary, y = alpha)) +
-  geom_bar(stat = "identity", fill = "grey") +
+  geom_bar(stat = "identity", fill = "grey", color = "black") +
   labs(title = "Alpha Diversity by Estuary",
        x = "Estuary",
        y = "Alpha Diversity") +
@@ -397,3 +397,63 @@ slice80_percentage
 ```
 
 However, this is way less species than our previous methods.
+
+## Range Centre Method
+
+Let's try a different method using the range and range centre for each species. To do this we will need to calculate the western and eastern limits, as well as the centre of the range for each species.
+
+First we need to extract the species abundance data and `kmWest` values from `EF`.
+
+```{r}
+# species abundance data
+spp <- EF[, 4:148]
+
+# distance from western boundary
+coords <- EF$kmWest          
+```
+
+Now we need to calculate the range for each species. We can create a function to do this.
+
+```{r}
+range_stats <- function(abundance, coords) {
+  present_coords <- coords[abundance > 0]  # get kmWest values where species is present
+  
+  if (length(present_coords) == 0) {
+    # species not present anywhere
+    return(c(west_limit = NA, east_limit = NA, center = NA))
+  } else {
+    west <- min(present_coords)                    # furthest west point
+    east <- max(present_coords)                    # furthest east point
+    centre <- mean(c(west, east))                  # center of range
+    
+    return(c(west_limit = west, east_limit = east, centre = centre))
+  }
+}
+
+# apply the function across all species (columns)
+spp_range <- t(apply(spp, 2, range_stats, coords = coords))
+```
+
+Now we just need to plop our results into a dataframe which contains the species names as well as their `west_limit`, `east_limit` and `centre` values.
+
+```{r}
+# convert result to a clean data frame
+spp_range_list <- data.frame(
+  Species = colnames(spp),  # species names from column headers
+  spp_range                 # range stats: west, east, center
+)
+
+# preview first few rows of the result
+head(spp_range_list)
+```
+
+Now we can plot a histogram with the frequency of range centres per 100 km.
+
+```{r}
+ggplot(spp_range_list, aes(x = centre)) +
+  geom_histogram(binwidth = 100, fill = "grey", color = "black") +
+  xlab("Range Centre (km West)") +
+  ylab("Number of Species") +
+  ggtitle("Frequency of Species Range Centres (per 100 km)") +
+  theme_minimal()
+```
